@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""Summary
+"""Main utility to start a backup task.
 """
 import os
 
@@ -10,24 +10,25 @@ from .tasks import factory as tasks
 
 
 class Backup():
-    """Summary
+    """Backup task.
 
     Attributes
     ----------
     logger : object
         See <class :any:`LogSystem`>.
     """
+
     def __init__(self, task={}, settings={}, dry_run=False, logger=None):
         """Initialize.
 
         Parameters
         ----------
         task : dict, optional
-            Description
+            The backup task to perform.
         settings : dict, optional
-            Description
+            The settings used by the task.
         dry_run : bool, optional
-            Description
+            See :any:`BaseTask` > dry_run.
         logger : object
             See <class :any:`LogSystem`>.
         """
@@ -41,12 +42,12 @@ class Backup():
         self._start_time = ""
 
     def _backup(self):
-        """Summary
+        """Start backup.
 
         Raises
         ------
         app_utils.InvalidTaskName
-            Description
+            See :any:`app_utils.InvalidTaskName`.
         """
         try:
             driver = tasks(task_name=self._task.get("type"))
@@ -65,12 +66,12 @@ class Backup():
         self._warnings_count += warnings_count
 
     def run(self):
-        """Summary
+        """Start backup.
 
         Raises
         ------
         SystemExit
-            Description
+            Halt execution.
         """
         self._start_time = misc_utils.get_date_time()
 
@@ -134,3 +135,7 @@ class Backup():
             mail_body = message + "\n" + mail_settings.get("mail_body", "")
 
             mail.send(subject, mail_body)
+
+
+if __name__ == "__main__":
+    pass

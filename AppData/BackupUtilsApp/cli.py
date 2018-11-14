@@ -64,7 +64,10 @@ Options:
     UserData/settings/<name>.py. Extension omitted.
 
 -d, --dry-run
-    dry-run
+    Do not perform file system changes. Only display messages informing of the
+    actions that will be performed or commands that will be executed.
+    WARNING! Some file system changes will be performed (e.g. temporary files
+    creation).
 
 """.format(appname=__appname__,
            appdescription=__appdescription__,
@@ -84,9 +87,9 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
     action : method
         Set the method that will be executed when calling CommandLineTool.run().
     global_settings : dict
-        Description
+        Global settings that will be merged with task specific settings.
     tasks : list
-        Description
+        Backup tasks to perform.
     """
     action = None
     global_settings = {}
@@ -102,7 +105,7 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
         Raises
         ------
         SystemExit
-            Description
+            Halt execution.
         """
         self.a = docopt_args
         self._cli_header_blacklist = [
@@ -164,7 +167,7 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
         Raises
         ------
         exceptions.KeyboardInterruption
-            Description
+            See :any:`exceptions.KeyboardInterruption`.
         """
         try:
             if self.tasks:

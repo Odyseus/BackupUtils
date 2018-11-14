@@ -4,10 +4,8 @@
 
 Attributes
 ----------
-paths_map : TYPE
-    Description
-REPORT_TEMPLATE : TYPE
-    Description
+REPORT_TEMPLATE : str
+    Finalized task report template.
 root_folder : str
     The main folder containing the application. All commands must be executed
     from this location without exceptions.
@@ -24,7 +22,7 @@ from .python_utils import file_utils
 root_folder = os.path.realpath(os.path.abspath(os.path.join(
     os.path.normpath(os.getcwd()))))
 
-paths_map = {
+_paths_map = {
     "tasks": os.path.join(root_folder, "UserData", "tasks"),
     "settings": os.path.join(root_folder, "UserData", "settings")
 }
@@ -47,12 +45,12 @@ class InvalidCompressionLevel(exceptions.ExceptionWhitoutTraceBack):
     """
 
     def __init__(self, selected_comp_level):
-        """Summary
+        """Initialize.
 
         Parameters
         ----------
-        selected_comp_level : TYPE
-            Description
+        selected_comp_level : str
+            Invalid compression level.
         """
         msg = "%s is an invalid compression level. Valid values are from -1 to -9." % \
             str(selected_comp_level)
@@ -65,12 +63,12 @@ class InvalidCompressionType(exceptions.ExceptionWhitoutTraceBack):
     """
 
     def __init__(self, selected_comp_type):
-        """Summary
+        """Initialize.
 
         Parameters
         ----------
-        selected_comp_type : TYPE
-            Description
+        selected_comp_type : str
+            Invalid compression type.
         """
         msg = "%s is an invalid compression type. Valid values are 'xz', 'gzip' or 'bzip2'." % \
             str(selected_comp_type)
@@ -83,12 +81,12 @@ class InvalidTaskName(exceptions.ExceptionWhitoutTraceBack):
     """
 
     def __init__(self, task_name=""):
-        """Summary
+        """Initialize.
 
         Parameters
         ----------
         task_name : str, optional
-            Description
+            Invalid task name.
         """
         msg = "%s task name isn't valid." % task_name
         print("")
@@ -147,16 +145,19 @@ def notify_send(title, body, urgency="normal", icon="dialog-info", logger=None):
 
 
 def print_config_files_list(file_type):
-    """Summary
+    """Print config files list.
+
+    Used to print to standard output the list of configuration files (either "tasks" or "settings"
+    configuration files). The output is used only by the Bash completions script.
 
     Parameters
     ----------
-    file_type : TYPE
-        Description
+    file_type : str
+        One of "tasks" or "settings".
     """
     # FUTURE:
     # Use context manager with os.scandir().
-    list_of_files = [entry.name for entry in os.scandir(paths_map[file_type]) if
+    list_of_files = [entry.name for entry in os.scandir(_paths_map[file_type]) if
                      entry.is_file(follow_symlinks=False)]
 
     for f in list_of_files:

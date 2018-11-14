@@ -218,6 +218,7 @@ class BaseTask():
 class RsyncLocalTask(BaseTask):
     """Task to perform backups using the rsync command.
     """
+
     def __init__(self, **kwargs):
         """Initialize.
 
@@ -292,6 +293,7 @@ class RsyncLocalTask(BaseTask):
 class TarLocalTask(BaseTask):
     """Task to perform backups using the tar command.
     """
+
     def __init__(self, **kwargs):
         """Initialize.
 
@@ -405,3 +407,7 @@ def factory(task_name="base_task"):
         A task class.
     """
     return _tasks_map[task_name]
+
+
+if __name__ == "__main__":
+    pass
