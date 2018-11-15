@@ -1,0 +1,322 @@
+.\" Man page generated from reStructuredText.
+.
+.TH "APP.PY" "1" "Nov 15, 2018" "" "Backup Utils"
+.SH NAME
+app.py \- A CLI utility written in Python 3 to backup files on GNU/Linux.
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.SH HINT
+.sp
+This Python application can generate a system executable with Bash completions support. See \fBapp.py generate\fP\&.
+.SH CLI SYNOPSIS
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+
+app.py (\-h | \-\-help | \-\-manual | \-\-version)
+app.py backup (\-t <name> | \-\-task=<name>)
+              [\-t <name>... | \-\-task=<name>...]
+              [\-g <name> | \-\-global=<name>]
+              [\-d | \-\-dry\-run]
+app.py (print_tasks | print_settings)
+app.py generate (task | global | system_executable)
+
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SH MENTIONS
+.sp
+Application inspired by the \fI\%backup\-utils\fP <\fBhttps://gitlab.com/Oprax/backup-utils\fP> Python module.
+.SH REQUIREMENTS
+.sp
+No mayor requirements are needed to run this application other than Python 3.5+.
+.INDENT 0.0
+.INDENT 3.5
+.IP "Mail system requirements"
+.INDENT 0.0
+.IP \(bu 2
+\fBkeyring\fP module.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SS \fBkeyring\fP module
+.sp
+This module is only used by the email system and it is used to retrieve a password stored in the system\(aqs default keyring. This application will not store nor use passwords saved in plain text.
+.sp
+The following command executed from a terminal will store a password:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ keyring set backup_secret_context backup_secret_name
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+Then the password is retrieved by the application email system using the \fBsender_secret\fP tuple specified in \fBglobal_settings\fP like so:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+keyring\&.get_password("backup_secret_context", "backup_secret_name")
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+\fBbackup_secret_context\fP and \fBbackup_secret_name\fP can have any other names that one deems to give them. As to what these names actually mean, I have no idea. What I know is that in Gnome keyring, the details tab for the generated "storage" will display the following:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+username: backup_secret_name
+application: python\-keyring
+service: backup_secret_context
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SH DETAILED USAGE
+.SS CLI options
+.INDENT 0.0
+.IP \(bu 2
+\fB\-h\fP or \fB\-\-help\fP: Display this application basic help screen.
+.IP \(bu 2
+\fB\-\-manual\fP: Display this application manual.
+.IP \(bu 2
+\fB\-\-version\fP: Show this application version.
+.UNINDENT
+.SS Commands
+.SS app.py generate
+.SS Sub\-commands
+.INDENT 0.0
+.IP \(bu 2
+\fBsystem_executable\fP: Create an executable for the \fBapp.py\fP application on the system \fBPATH\fP to be able to run it from anywhere.
+.INDENT 2.0
+.INDENT 3.5
+.INDENT 0.0
+.IP \(bu 2
+The system executable creation process will ask for an executable name and the absolute path to store the executable file (the default is \fB$HOME/.local/bin\fP).
+.IP \(bu 2
+It will also ask for bash completions creation.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SS Example configuration files
+.SS Task example file
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+#!/usr/bin/python3
+# \-*\- coding: utf\-8 \-*\-
+"""Tasks example file.
+
+Attributes
+\-\-\-\-\-\-\-\-\-\-
+settings : dict, optional
+    Description
+tasks : dict, mandatory
+    Description
+"""
+
+
+def __pre_hook(**kwargs):
+    """Pre task hook.
+
+    Function that will be executed BEFORE a task is performed.
+
+    Parameters
+    \-\-\-\-\-\-\-\-\-\-
+    **kwargs
+        Keyword arguments passed. See documentation/manual for details.
+    """
+    for key, value in kwargs.items():
+        print(key + " = " + repr(value))
+
+
+def __post_hook(**kwargs):
+    """Post task hook.
+
+    Function that will be executed AFTER a task is performed.
+
+    Parameters
+    \-\-\-\-\-\-\-\-\-\-
+    **kwargs
+        Keyword arguments passed. See documentation/manual for details.
+    """
+    for key, value in kwargs.items():
+        print(key + " = " + repr(value))
+
+
+settings = {
+    ##########################################################
+    # See settings_example.py file.                          #
+    # If a global settings file is used in the command line, #
+    # the settings defined inside this tasks file will       #
+    # override the global settings.                          #
+    # See documentation/manual for details.                  #
+    # ########################################################
+}
+
+
+tasks = [
+    # #################################
+    # Tar task for local file systems #
+    # #################################
+    {
+        "type": "tar_local",
+        "name": "Descriptive name for this task",
+        "destination": "/path/to/a/folder",
+        "destination_prefix": "MyHome\-",
+        "compression_level": "\-7",
+        # WARNING!
+        # DO NOT USE GROUPED FUNCTION ARGUMENTS (A.K.A Old Option Style)!
+        # Read the documentation/manual for details.
+        "func_args": ["\-\-xz"],
+        "opt_args": [
+            "\-\-totals",
+            "\-\-record\-size=1M",
+            "\-\-checkpoint=50",
+            \(aq\-\-checkpoint\-action=echo="%T"\(aq,
+        ],
+        "pre_hook": __pre_hook,
+        "post_hook": __post_hook,
+        "items": [
+            "/absolute/path/to/a/folder",
+            "/absolute/path/to/a/file",
+            "~/relative/path/to/a/folder/inside/user/home",
+            "~/relative/path/to/a/file/inside/user/home"
+        ]
+    },
+    # ###################################
+    # Rsync task for local file systems #
+    # ###################################
+    {
+        "type": "rsync_local",
+        "name": "Descriptive name for this task",
+        "rsync_args": [
+            "\-\-archive",
+            "\-\-delete",
+            "\-\-keep\-dirlinks",
+            "\-\-delete\-excluded",
+            "\-\-delete\-delay",
+            "\-\-info=progress2"
+        ],
+        "destination": "/path/to/a/folder",
+        "pre_hook": __pre_hook,
+        "post_hook": __post_hook,
+        "items": [
+            "/absolute/path/to/a/folder",
+            "~/relative/path/to/a/folder/inside/user/home"
+        ]
+    }
+]
+
+
+if __name__ == "__main__":
+    pass
+
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS Settings example file
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+#!/usr/bin/python3
+# \-*\- coding: utf\-8 \-*\-
+"""Global settings example file.
+
+Attributes
+\-\-\-\-\-\-\-\-\-\-
+settings : dict, mandatory
+    Description
+"""
+
+settings = {
+    "sound_notification": True,
+    "desktop_notification": True,
+    "mail_notification": False,
+    "mail_settings": {
+        "ask_for_password": False,
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "sender_address": "user_name@gmail.com",
+        "sender_username": "user_name@gmail.com",
+        "secret_service_name": "secret_service_name",
+        "secret_user_name": "secret_user_name",
+        "use_tls": True,
+        "mail_subject": "Backup Utils report",
+        "mail_body": "",
+        "mailing_list": [
+            "user_name1@gmail.com",
+            "user_name2@yahoo.com",
+            "user_name3@example.com",
+        ],
+    },
+    "ignored_patterns": [
+        ".git",
+        "__000__",
+        "*\-lock",
+        "*.bak",
+        "*.log",
+        "*.pyc",
+        ".parentlock",
+        "lock",
+        "__pycache__",
+        "*.sublime\-workspace",
+    ]
+}
+
+
+if __name__ == "__main__":
+    pass
+
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SH AUTHOR
+Odyseus
+.SH COPYRIGHT
+2016-2018, Odyseus
+.\" Generated by docutils manpage writer.
+.
