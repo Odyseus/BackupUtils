@@ -7,6 +7,7 @@ import os
 import tempfile
 
 from collections import Callable
+from copy import deepcopy
 from shlex import quote as shell_quote
 from subprocess import CalledProcessError
 from subprocess import STDOUT
@@ -193,8 +194,14 @@ class BaseTask():
         if isinstance(hook, Callable):
             self.logger.info("Attempting to run %s-hook." % hook_type)
 
+            task_copy = deepcopy(self._task)
+
+            for key in ["pre_hook", "post_hook"]:
+                if key in task_copy:
+                    del task_copy[key]
+
             try:
-                hook(task=self._task, settings=self._settings,
+                hook(task=task_copy, settings=self._settings,
                      dry_run=self._dry_run, logger=self.logger, **kwargs)
             except Exception as err:
                 self.logger.error(err)
@@ -242,8 +249,7 @@ class RsyncLocalTask(BaseTask):
         cmd += exclude_patterns
 
         if self._dry_run:
-            self.logger.warning("[DRY-RUN] Destination folder to be created:")
-            self.logger.info(root_destination, date=False)
+            self.logger.log_dry_run("Destination folder will be created:\n%s" % root_destination)
         else:
             os.makedirs(root_destination, exist_ok=True)
 
@@ -263,8 +269,7 @@ class RsyncLocalTask(BaseTask):
                 self.logger.info("Mirroring: %s" % source_item, date=False)
 
                 if self._dry_run:
-                    self.logger.warning("[DRY-RUN] Command to be executed:")
-                    self.logger.info(final_cmd, date=False)
+                    self.logger.log_dry_run("Command that will be executed:\n%s" % final_cmd)
                 else:
                     try:
                         start_time = misc_utils.get_date_time()
@@ -339,7 +344,7 @@ class TarLocalTask(BaseTask):
         full_list_of_files = "\n".join(processed_list.get_full_list_of_files())
         tar_env = cmd_utils.get_environment()
         compression_data = self.__get_compression_data()
-        compression_level = self._task.get("compression_level", "-7")
+        compression_level = self._task.get("tar_compression_level", "-7")
         archive_destination = self._task.get("destination", "")
         archive_file_name = "%s%s.tar" % \
             (self._task.get("destination_prefix", ""),
@@ -349,8 +354,7 @@ class TarLocalTask(BaseTask):
                                     archive_file_name + archive_file_ext)
 
         if self._dry_run:
-            self.logger.warning("[DRY-RUN] Destination folder to be created:")
-            self.logger.info(archive_destination, date=False)
+            self.logger.log_dry_run("Destination folder will be created:\n%s" % archive_destination)
         else:
             os.makedirs(archive_destination, exist_ok=True)
 
@@ -368,11 +372,10 @@ class TarLocalTask(BaseTask):
                 "--file",
                 shell_quote(archive_path),
                 "--files-from=%s" % tmp_file.name
-            ] + self._task.get("opt_args", [])
+            ] + self._task.get("tar_opt_args", [])
 
             if self._dry_run:
-                self.logger.warning("[DRY-RUN] Command to be executed:")
-                self.logger.info(" ".join(cmd), date=False)
+                self.logger.log_dry_run("Command that will be executed:\n%s" % " ".join(cmd))
             else:
                 try:
                     cmd_utils.run_cmd(cmd,

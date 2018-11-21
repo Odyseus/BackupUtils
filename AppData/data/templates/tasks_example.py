@@ -59,12 +59,12 @@ tasks = [
         "name": "Descriptive name for this task",
         "destination": "/path/to/a/folder",
         "destination_prefix": "MyHome-",
-        "compression_level": "-7",
+        "tar_compression_level": "-7",
         # WARNING!
         # DO NOT USE GROUPED FUNCTION ARGUMENTS (A.K.A Old Option Style)!
         # Read the documentation/manual for details.
-        "func_args": ["--xz"],
-        "opt_args": [
+        "tar_func_args": ["--xz"],
+        "tar_opt_args": [
             "--totals",
             "--record-size=1M",
             "--checkpoint=50",
