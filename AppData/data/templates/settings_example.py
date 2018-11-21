@@ -5,7 +5,7 @@
 Attributes
 ----------
 settings : dict, mandatory
-    See documentation/manual.
+    See documentation/manual for details.
 """
 
 settings = {

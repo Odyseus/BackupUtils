@@ -5,16 +5,16 @@
 Attributes
 ----------
 settings : dict, optional
-    Description
+    See documentation/manual for details.
 tasks : dict, mandatory
-    Description
+    See documentation/manual for details.
 """
 
 
 def __pre_hook(**kwargs):
-    """Pre task hook.
+    """Pre-task hook.
 
-    Function that will be executed BEFORE a task is performed.
+    Function that will be executed BEFORE a backup task is performed.
 
     Parameters
     ----------
@@ -26,9 +26,9 @@ def __pre_hook(**kwargs):
 
 
 def __post_hook(**kwargs):
-    """Post task hook.
+    """Post-task hook.
 
-    Function that will be executed AFTER a task is performed.
+    Function that will be executed AFTER a backup task is performed.
 
     Parameters
     ----------
