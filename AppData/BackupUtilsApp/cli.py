@@ -41,7 +41,7 @@ Usage:
                   [-g <name> | --global=<name>]
                   [-d | --dry-run]
     app.py (print_tasks | print_settings)
-    app.py generate (task | global | system_executable)
+    app.py generate system_executable
 
 Options:
 
