@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "APP.PY" "1" "Nov 15, 2018" "" "Backup Utils"
+.TH "APP.PY" "1" "Nov 22, 2018" "" "Backup Utils"
 .SH NAME
 app.py \- A CLI utility written in Python 3 to backup files on GNU/Linux.
 .
@@ -46,7 +46,7 @@ app.py backup (\-t <name> | \-\-task=<name>)
               [\-g <name> | \-\-global=<name>]
               [\-d | \-\-dry\-run]
 app.py (print_tasks | print_settings)
-app.py generate (task | global | system_executable)
+app.py generate system_executable
 
 .ft P
 .fi
@@ -60,7 +60,7 @@ Application inspired by the \fI\%backup\-utils\fP <\fBhttps://gitlab.com/Oprax/b
 No mayor requirements are needed to run this application other than Python 3.5+.
 .INDENT 0.0
 .INDENT 3.5
-.IP "Mail system requirements"
+.IP "Mail system optional requirement"
 .INDENT 0.0
 .IP \(bu 2
 \fBkeyring\fP module.
@@ -69,46 +69,66 @@ No mayor requirements are needed to run this application other than Python 3.5+.
 .UNINDENT
 .SS \fBkeyring\fP module
 .sp
-This module is only used by the email system and it is used to retrieve a password stored in the system\(aqs default keyring. This application will not store nor use passwords saved in plain text.
+This module is only used by the email system and it is used to retrieve a password stored in the system\(aqs default keyring. This module is optional because the mail system can be configured to ask for a password. This application will not store nor use passwords saved in plain text.
 .sp
-The following command executed from a terminal will store a password:
+The following command executed from a terminal will prompt for a password that will be stored into the system\(aqs keyring:
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-$ keyring set backup_secret_context backup_secret_name
+$ keyring set backup_secret_service_name backup_secret_user_name
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .sp
-Then the password is retrieved by the application email system using the \fBsender_secret\fP tuple specified in \fBglobal_settings\fP like so:
+Then the password is retrieved from the system\(aqs keyring by the application email system using the \fBsecret_service_name\fP and \fBsecret_user_name\fP keys specified in the \fBsettings\fP property from a \fBsettings\fP file or a \fBtasks\fP file like so:
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-keyring\&.get_password("backup_secret_context", "backup_secret_name")
+keyring\&.get_password("backup_secret_service_name", "backup_secret_user_name")
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .sp
-\fBbackup_secret_context\fP and \fBbackup_secret_name\fP can have any other names that one deems to give them. As to what these names actually mean, I have no idea. What I know is that in Gnome keyring, the details tab for the generated "storage" will display the following:
+\fBbackup_secret_service_name\fP and \fBbackup_secret_user_name\fP can have any other names that one deems to give them. As an example, in Gnome keyring, the details tab for the generated \fIstorage\fP will display the following:
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-username: backup_secret_name
+username: backup_secret_user_name
 application: python\-keyring
-service: backup_secret_context
+service: backup_secret_service_name
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .SH DETAILED USAGE
+.sp
+\fBWARNING:\fP
+.INDENT 0.0
+.INDENT 3.5
+Always use the \fB\-\-dry\-run\fP CLI option to see the exact command/s that will be executed.
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.INDENT 3.5
+.IP "Highlights"
+.INDENT 0.0
+.IP \(bu 2
+Backup tasks are read from configuration files located in \fBUserData/tasks/*.py\fP\&.
+.IP \(bu 2
+Global settings are read from configuration files located in \fBUserData/settings/*.py\fP\&.
+.IP \(bu 2
+Each tasks file can have defined their own settings and contain one or more backup tasks of any type.
+.UNINDENT
+.UNINDENT
+.UNINDENT
 .SS CLI options
 .INDENT 0.0
 .IP \(bu 2
@@ -119,6 +139,35 @@ service: backup_secret_context
 \fB\-\-version\fP: Show this application version.
 .UNINDENT
 .SS Commands
+.SS app.py backup
+.sp
+The main command to perform backup tasks.
+.SS Options
+.INDENT 0.0
+.IP \(bu 2
+\fB\-t <name>\fP or \fB\-\-task=<name>\fP: File name of the file containing the backup tasks. Should be the name of a file stored in \fBUserData/tasks/<name>.py\fP\&. Extension omitted.
+.IP \(bu 2
+\fB\-g <name>\fP or \fB\-\-global=<name>\fP: File name of the file containing the global settings that all the backup tasks will use. Should be the name of a file stored in \fBUserData/settings/<name>.py\fP\&. Extension omitted.
+.IP \(bu 2
+\fB\-d\fP or \fB\-\-dry\-run\fP: Do not perform file system changes. Only display messages informing of the actions that will be performed or commands that will be executed.
+.INDENT 2.0
+.INDENT 3.5
+.sp
+\fBWARNING:\fP
+.INDENT 0.0
+.INDENT 3.5
+Some file system changes will be performed (e.g. temporary files creation).
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SS app.py print_tasks
+.sp
+Command only used by the Bash completions script to assist in the auto\-completion of the \fB\-t <name>\fP or \fB\-\-task=<name>\fP CLI options.
+.SS app.py print_settings
+.sp
+Command only used by the Bash completions script to assist in the auto\-completion of the \fB\-g <name>\fP or \fB\-\-global=<name>\fP CLI options.
 .SS app.py generate
 .SS Sub\-commands
 .INDENT 0.0
@@ -135,8 +184,17 @@ It will also ask for bash completions creation.
 .UNINDENT
 .UNINDENT
 .UNINDENT
-.SS Example configuration files
+.SH FILE TEMPLATES
+.sp
+\fBWARNING:\fP
+.INDENT 0.0
+.INDENT 3.5
+Always use the \fB\-\-dry\-run\fP CLI option to see the exact command/s that will be executed.
+.UNINDENT
+.UNINDENT
 .SS Task example file
+.sp
+A tasks file is a Python script containing at least a property called \fBtasks\fP (mandatory). The \fBtasks\fP property must be a list of dictionaries, each dictionary representing a backup task.
 .INDENT 0.0
 .INDENT 3.5
 .sp
@@ -149,16 +207,16 @@ It will also ask for bash completions creation.
 Attributes
 \-\-\-\-\-\-\-\-\-\-
 settings : dict, optional
-    Description
+    See documentation/manual for details.
 tasks : dict, mandatory
-    Description
+    See documentation/manual for details.
 """
 
 
 def __pre_hook(**kwargs):
-    """Pre task hook.
+    """Pre\-task hook.
 
-    Function that will be executed BEFORE a task is performed.
+    Function that will be executed BEFORE a backup task is performed.
 
     Parameters
     \-\-\-\-\-\-\-\-\-\-
@@ -170,9 +228,9 @@ def __pre_hook(**kwargs):
 
 
 def __post_hook(**kwargs):
-    """Post task hook.
+    """Post\-task hook.
 
-    Function that will be executed AFTER a task is performed.
+    Function that will be executed AFTER a backup task is performed.
 
     Parameters
     \-\-\-\-\-\-\-\-\-\-
@@ -203,12 +261,12 @@ tasks = [
         "name": "Descriptive name for this task",
         "destination": "/path/to/a/folder",
         "destination_prefix": "MyHome\-",
-        "compression_level": "\-7",
+        "tar_compression_level": "\-7",
         # WARNING!
         # DO NOT USE GROUPED FUNCTION ARGUMENTS (A.K.A Old Option Style)!
         # Read the documentation/manual for details.
-        "func_args": ["\-\-xz"],
-        "opt_args": [
+        "tar_func_args": ["\-\-xz"],
+        "tar_opt_args": [
             "\-\-totals",
             "\-\-record\-size=1M",
             "\-\-checkpoint=50",
@@ -255,6 +313,67 @@ if __name__ == "__main__":
 .fi
 .UNINDENT
 .UNINDENT
+.SS Data keys
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+All data keys are of type string and are optional unless specified otherwise.
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.IP \(bu 2
+\fBtype\fP (\fBMandatory\fP): Task type. See backup\-utils\-task\-types\-reference\&.
+.IP \(bu 2
+\fBname\fP (\fBMandatory\fP): Task name.
+.IP \(bu 2
+\fBdestination\fP (\fBMandatory\fP): Absolute path to where the backup files or folders will be stored.
+.IP \(bu 2
+\fBitems\fP (\fBMandatory\fP | \fBList\fP): The list of paths to backup. Depending on the task type, path can be files or folders of both. See backup\-utils\-task\-types\-reference\&.
+.IP \(bu 2
+\fBdestination_prefix\fP: A string that will be added to the backed up files/folders. Its usage depends on the type of task. See backup\-utils\-task\-types\-reference\&.
+.IP \(bu 2
+\fBtar_compression_level\fP (\fBtar_local\fP only): See backup\-utils\-tar\-local\-type\-reference\&.
+.IP \(bu 2
+\fBtar_comp_arg\fP (\fBList\fP | \fBtar_local\fP only): See backup\-utils\-tar\-local\-type\-reference\&.
+.IP \(bu 2
+\fBtar_opt_args\fP (\fBList\fP | \fBtar_local\fP only): See backup\-utils\-tar\-local\-type\-reference\&.
+.IP \(bu 2
+\fBrsync_args\fP (\fBList\fP | \fBrsync_local\fP only): See backup\-utils\-rsync\-type\-reference\&.
+.IP \(bu 2
+\fBpre_hook\fP (\fBMethod\fP): A Python function to be executed \fBBEFORE\fP a backup job is performed.
+.IP \(bu 2
+\fBpost_hook\fP (\fBMethod\fP): A Python function to be executed \fBAFTER\fP a backup job is performed.
+.INDENT 2.0
+.INDENT 3.5
+.INDENT 0.0
+.INDENT 3.5
+.IP "\fBpre_hook\fP and \fBpost_hook\fP methods passed arguments"
+.INDENT 0.0
+.IP \(bu 2
+\fBtask\fP: A modified copy of the task object that was used to run the backup job. Modifications:
+.INDENT 2.0
+.INDENT 3.5
+.INDENT 0.0
+.IP \(bu 2
+The \fBitems\fP key contains only valid paths.
+.IP \(bu 2
+The \fBpre_hook\fP and \fBpost_hook\fP keys are removed to avoid accidental infinite loops.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+\fBsettings\fP: The settings object that was used when running the backup job.
+.IP \(bu 2
+\fBdry_run\fP: Whether the \fB\-\-dry\-run\fP CLI option was used.
+.IP \(bu 2
+\fBlogger\fP: See <class \fBLogSystem\fP>.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
 .SS Settings example file
 .INDENT 0.0
 .INDENT 3.5
@@ -268,7 +387,7 @@ if __name__ == "__main__":
 Attributes
 \-\-\-\-\-\-\-\-\-\-
 settings : dict, mandatory
-    Description
+    See documentation/manual for details.
 """
 
 settings = {
@@ -313,6 +432,118 @@ if __name__ == "__main__":
 .ft P
 .fi
 .UNINDENT
+.UNINDENT
+.SS Data keys
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+All data keys are of type string and are optional unless specified otherwise.
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.IP \(bu 2
+\fBsound_notification\fP (\fBBoolean\fP) (\fBDefault\fP: True): Whether to play a sound or not after a backup job is finished.
+.IP \(bu 2
+\fBdesktop_notification\fP (\fBBoolean\fP) (\fBDefault\fP: True): Whether to display a desktop notification or not after a backup job is finished.
+.IP \(bu 2
+\fBmail_notification\fP (\fBBoolean\fP) (\fBDefault\fP: False): Whether to send a report via e\-mail or not after a backup job is finished.
+.IP \(bu 2
+\fBignored_patterns\fP (\fBList\fP): A list of file patterns to exclude from a backup job.
+.IP \(bu 2
+\fBmail_settings\fP (\fBDictionary\fP): Settings used to send e\-mails in case that \fBmail_notification\fP is set to \fBTrue\fP\&.
+.INDENT 2.0
+.INDENT 3.5
+.INDENT 0.0
+.IP \(bu 2
+\fBask_for_password\fP (\fBBoolean\fP) (\fBDefault\fP: False): If set to \fBFalse\fP, an attempt to get the sender\(aqs password from the system\(aqs keyring will be performed. The keys \fBsecret_service_name\fP and \fBsecret_user_name\fP should contain valid data to retrieve said password. If set to \fBTrue\fP, the mail system will always prompt for a password, and no attempt to retrieve a password from the system\(aqs keyring will be made. See \fI\%Requirements\fP\&.
+.IP \(bu 2
+\fBsender_address\fP: The sender\(aqs e\-mail address.
+.IP \(bu 2
+\fBsender_username\fP: The sender\(aqs user name.
+.IP \(bu 2
+\fBsmtp_server\fP: The SMTP server for the sender\(aqs account.
+.IP \(bu 2
+\fBsmtp_port\fP (\fBInteger\fP): The SMTP port for the sender\(aqs account.
+.IP \(bu 2
+\fBsecret_service_name\fP: See \fI\%Requirements\fP\&.
+.IP \(bu 2
+\fBsecret_user_name\fP: See \fI\%Requirements\fP\&.
+.IP \(bu 2
+\fBuse_tls\fP (\fBBoolean\fP) (\fBDefault\fP: True): Whether to use TLS or not.
+.IP \(bu 2
+\fBmail_subject\fP (\fBDefault\fP: Backup Utils Report): Text that will be used in the \fBSubject\fP of the sent e\-mail.
+.IP \(bu 2
+\fBmail_body\fP: Text that will be displayed after the backup report.
+.IP \(bu 2
+\fBmailing_list\fP (\fBList\fP): A list of e\-mail addresses to send a backup report to.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH TASK TYPES
+.sp
+\fBWARNING:\fP
+.INDENT 0.0
+.INDENT 3.5
+Always use the \fB\-\-dry\-run\fP CLI option to see the exact command/s that will be executed.
+.UNINDENT
+.UNINDENT
+.SS tar_local
+.sp
+This task uses the \fBtar\fP command available on a system to create an archive with the content of all the items (files and folder) defined in a task object.
+.INDENT 0.0
+.INDENT 3.5
+.IP "Highlights"
+.INDENT 0.0
+.IP \(bu 2
+This task can backup files and folders.
+.IP \(bu 2
+Only local file system paths are allowed.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SS Data keys specific to this task type
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+All data keys are of type string and are optional unless specified otherwise.
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.IP \(bu 2
+\fBtar_compression_level\fP (\fBDefault\fP: \-7): A value between \-1 and \-9. This value is used to set environment variables used by \fBtar\fP (XZ_OPT, GZIP_OPT or BZIP2) to set a compression level. If no compression argument is defined in \fBtar_func_args\fP, the environment variables will not be set and \fBtar_compression_level\fP will not be used.
+.IP \(bu 2
+\fBtar_func_args\fP (\fBList\fP) (\fBDefault\fP: empty (no function arguments are passed to \fBtar\fP)): A list of function arguments used by the \fBtar\fP program. Possible values for the compression arguments are \fB\-\-xz\fP, \fB\-J\fP, \fB\-\-gzip\fP, \fB\-z\fP, \fB\-\-bzip2\fP or \fB\-j\fP\&. Do not use \fIold option style\fP, either use short options (e.g.: \fB\-j\fP) or long options (e.g.: \fB\-\-xz\fP). See \fI\%GNU tar manual\fP <\fBhttps://www.gnu.org/software/tar/manual/tar.html\fP>\&.
+.IP \(bu 2
+\fBtar_opt_args\fP (\fBList\fP): See backup\-utils\-tar\-local\-type\-reference\&.
+.UNINDENT
+.SS rsync_local
+.sp
+This task uses the \fBrsync\fP command available on a system to create a mirror of each folder (\fBitems\fP key) defined in a task object.
+.INDENT 0.0
+.INDENT 3.5
+.IP "Highlights"
+.INDENT 0.0
+.IP \(bu 2
+This task can only backup folders.
+.IP \(bu 2
+Only local file system paths are allowed.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SS Data keys specific to this task type
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+All data keys are of type string and are optional unless specified otherwise.
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.IP \(bu 2
+\fBrsync_args\fP (\fBList\fP): Extra arguments passed to the \fBrsync\fP command.
 .UNINDENT
 .SH AUTHOR
 Odyseus
