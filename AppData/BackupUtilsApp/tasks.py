@@ -19,32 +19,32 @@ from .python_utils import file_utils
 from .python_utils import misc_utils
 from .python_utils import shell_utils
 
-__xz_map = {
+_xz_map = {
     "ext": ".xz",
     "env": "XZ_OPT"
 }
 
-__gzip_map = {
+_gzip_map = {
     "ext": ".gz",
     "env": "GZIP_OPT"
 }
 
-__bzip2_map = {
+_bzip2_map = {
     "ext": ".bz2",
     "env": "BZIP2"
 }
 
-__tar_comp_map = {
-    "--xz": __xz_map,
-    "-J": __xz_map,
-    "--gzip": __gzip_map,
-    "-z": __gzip_map,
-    "--bzip2": __bzip2_map,
-    "-j": __bzip2_map
+_tar_comp_map = {
+    "--xz": _xz_map,
+    "-J": _xz_map,
+    "--gzip": _gzip_map,
+    "-z": _gzip_map,
+    "--bzip2": _bzip2_map,
+    "-j": _bzip2_map
 }
 
-__tar_comp_level_values = {"-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9",
-                           -1, -2, -3, -4, -5, -6, -7, -8, -9}
+_tar_comp_level_values = {"-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9",
+                          -1, -2, -3, -4, -5, -6, -7, -8, -9}
 
 
 class BaseTask():
@@ -313,7 +313,7 @@ class TarLocalTask(BaseTask):
     def __get_compression_data(self):
         """Get compression data.
 
-        Scan ``func_args`` option for tar compression arguments and, if found, return
+        Scan ``tar_func_args`` option for tar compression arguments and, if found, return
         a dictionary with the extension that will be used to name the compressed archive
         and the environment variable used to define the compression level.
 
@@ -322,11 +322,11 @@ class TarLocalTask(BaseTask):
         dict|False
             Compression data.
         """
-        for arg in self._task.get("func_args", []):
-            if arg in __tar_comp_map:
+        for arg in self._task.get("tar_func_args", []):
+            if arg in _tar_comp_map:
                 return {
-                    "ext": __tar_comp_map[arg]["ext"],
-                    "env": __tar_comp_map[arg]["env"]
+                    "ext": _tar_comp_map[arg]["ext"],
+                    "env": _tar_comp_map[arg]["env"]
                 }
 
         return False
@@ -368,7 +368,7 @@ class TarLocalTask(BaseTask):
             cmd = [
                 self._cmd,
                 "--create",
-            ] + self._task.get("func_args", []) + [
+            ] + self._task.get("tar_func_args", []) + [
                 "--file",
                 shell_quote(archive_path),
                 "--files-from=%s" % tmp_file.name
