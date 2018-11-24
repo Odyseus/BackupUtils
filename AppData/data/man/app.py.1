@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "APP.PY" "1" "Nov 22, 2018" "" "Backup Utils"
+.TH "APP.PY" "1" "Nov 24, 2018" "" "Backup Utils"
 .SH NAME
 app.py \- A CLI utility written in Python 3 to backup files on GNU/Linux.
 .
@@ -323,23 +323,23 @@ All data keys are of type string and are optional unless specified otherwise.
 .UNINDENT
 .INDENT 0.0
 .IP \(bu 2
-\fBtype\fP (\fBMandatory\fP): Task type. See backup\-utils\-task\-types\-reference\&.
+\fBtype\fP (\fBMandatory\fP): Task type. See \fI\%Task types\fP\&.
 .IP \(bu 2
 \fBname\fP (\fBMandatory\fP): Task name.
 .IP \(bu 2
 \fBdestination\fP (\fBMandatory\fP): Absolute path to where the backup files or folders will be stored.
 .IP \(bu 2
-\fBitems\fP (\fBMandatory\fP | \fBList\fP): The list of paths to backup. Depending on the task type, path can be files or folders of both. See backup\-utils\-task\-types\-reference\&.
+\fBitems\fP (\fBMandatory\fP | \fBList\fP): The list of paths to backup. Depending on the task type, path can be files or folders of both. See \fI\%Task types\fP\&.
 .IP \(bu 2
-\fBdestination_prefix\fP: A string that will be added to the backed up files/folders. Its usage depends on the type of task. See backup\-utils\-task\-types\-reference\&.
+\fBdestination_prefix\fP: A string that will be added to the backed up files/folders. Its usage depends on the type of task. See \fI\%Task types\fP\&.
 .IP \(bu 2
-\fBtar_compression_level\fP (\fBtar_local\fP only): See backup\-utils\-tar\-local\-type\-reference\&.
+\fBtar_compression_level\fP (\fBtar_local\fP only): See \fI\%tar_local\fP\&.
 .IP \(bu 2
-\fBtar_comp_arg\fP (\fBList\fP | \fBtar_local\fP only): See backup\-utils\-tar\-local\-type\-reference\&.
+\fBtar_comp_arg\fP (\fBList\fP | \fBtar_local\fP only): See \fI\%tar_local\fP\&.
 .IP \(bu 2
-\fBtar_opt_args\fP (\fBList\fP | \fBtar_local\fP only): See backup\-utils\-tar\-local\-type\-reference\&.
+\fBtar_opt_args\fP (\fBList\fP | \fBtar_local\fP only): See \fI\%tar_local\fP\&.
 .IP \(bu 2
-\fBrsync_args\fP (\fBList\fP | \fBrsync_local\fP only): See backup\-utils\-rsync\-type\-reference\&.
+\fBrsync_args\fP (\fBList\fP | \fBrsync_local\fP only): See \fI\%rsync_local\fP\&.
 .IP \(bu 2
 \fBpre_hook\fP (\fBMethod\fP): A Python function to be executed \fBBEFORE\fP a backup job is performed.
 .IP \(bu 2
@@ -517,7 +517,7 @@ All data keys are of type string and are optional unless specified otherwise.
 .IP \(bu 2
 \fBtar_func_args\fP (\fBList\fP) (\fBDefault\fP: empty (no function arguments are passed to \fBtar\fP)): A list of function arguments used by the \fBtar\fP program. Possible values for the compression arguments are \fB\-\-xz\fP, \fB\-J\fP, \fB\-\-gzip\fP, \fB\-z\fP, \fB\-\-bzip2\fP or \fB\-j\fP\&. Do not use \fIold option style\fP, either use short options (e.g.: \fB\-j\fP) or long options (e.g.: \fB\-\-xz\fP). See \fI\%GNU tar manual\fP <\fBhttps://www.gnu.org/software/tar/manual/tar.html\fP>\&.
 .IP \(bu 2
-\fBtar_opt_args\fP (\fBList\fP): See backup\-utils\-tar\-local\-type\-reference\&.
+\fBtar_opt_args\fP (\fBList\fP): See \fI\%tar_local\fP\&.
 .UNINDENT
 .SS rsync_local
 .sp
