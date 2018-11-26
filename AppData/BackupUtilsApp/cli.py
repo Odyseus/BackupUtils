@@ -55,18 +55,18 @@ Options:
     Show application version.
 
 -t <name>, --task=<name>
-    File name of the file containing the backup task. Should be the name of a
+    File name of the file containing backup tasks. Should be the name of a
     file stored in UserData/tasks/<name>.py. Extension omitted.
 
 -g <name>, --global=<name>
-    File name of the file containing the global settings that all the backup
-    tasks will use. Should be the name of a file stored in
+    File name of a file containing global settings that all the backup tasks
+    will use. Should be the name of a file stored in
     UserData/settings/<name>.py. Extension omitted.
 
 -d, --dry-run
     Do not perform file system changes. Only display messages informing of the
     actions that will be performed or commands that will be executed.
-    WARNING! Some file system changes will be performed (e.g. temporary files
+    WARNING! Some file system changes will be performed (e.g., temporary files
     creation).
 
 """.format(appname=__appname__,
