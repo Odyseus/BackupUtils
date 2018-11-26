@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "APP.PY" "1" "Nov 24, 2018" "" "Backup Utils"
+.TH "APP.PY" "1" "Nov 26, 2018" "" "Backup Utils"
 .SH NAME
 app.py \- A CLI utility written in Python 3 to backup files on GNU/Linux.
 .
@@ -156,7 +156,7 @@ The main command to perform backup tasks.
 \fBWARNING:\fP
 .INDENT 0.0
 .INDENT 3.5
-Some file system changes will be performed (e.g. temporary files creation).
+Some file system changes will be performed (e.g., temporary files creation).
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -330,6 +330,22 @@ All data keys are of type string and are optional unless specified otherwise.
 \fBdestination\fP (\fBMandatory\fP): Absolute path to where the backup files or folders will be stored.
 .IP \(bu 2
 \fBitems\fP (\fBMandatory\fP | \fBList\fP): The list of paths to backup. Depending on the task type, path can be files or folders of both. See \fI\%Task types\fP\&.
+.INDENT 2.0
+.INDENT 3.5
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.IP \(bu 2
+Paths defined here that have as initial component the character \fB~\fP will be replaced with the user’s home directory (e.g., \fB~/.config\fP will be expanded to \fB/home/user_name/.config\fP).
+.IP \(bu 2
+Environment variables will also be expanded (e.g., \fB/home/$USER/.config\fP will be expanded to \fB/home/user_name/.config\fP).
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
 .IP \(bu 2
 \fBdestination_prefix\fP: A string that will be added to the backed up files/folders. Its usage depends on the type of task. See \fI\%Task types\fP\&.
 .IP \(bu 2
@@ -368,6 +384,8 @@ The \fBpre_hook\fP and \fBpost_hook\fP keys are removed to avoid accidental infi
 \fBdry_run\fP: Whether the \fB\-\-dry\-run\fP CLI option was used.
 .IP \(bu 2
 \fBlogger\fP: See <class \fBLogSystem\fP>.
+.IP \(bu 2
+\fB**kwords**\fP: Some task types can pass extra arguments to the \fBpost_hook\fP mothod. See \fI\%Task types\fP\&.
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -478,6 +496,13 @@ All data keys are of type string and are optional unless specified otherwise.
 .IP \(bu 2
 \fBmailing_list\fP (\fBList\fP): A list of e\-mail addresses to send a backup report to.
 .UNINDENT
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+All \fBmail_settings\fP keys are mandatory.
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -491,7 +516,7 @@ Always use the \fB\-\-dry\-run\fP CLI option to see the exact command/s that wil
 .UNINDENT
 .SS tar_local
 .sp
-This task uses the \fBtar\fP command available on a system to create an archive with the content of all the items (files and folder) defined in a task object.
+This task uses the \fBtar\fP command available on a system to create an archive with the content of all the \fBitems\fP (files and folders) defined in a task object.
 .INDENT 0.0
 .INDENT 3.5
 .IP "Highlights"
@@ -500,6 +525,8 @@ This task uses the \fBtar\fP command available on a system to create an archive 
 This task can backup files and folders.
 .IP \(bu 2
 Only local file system paths are allowed.
+.IP \(bu 2
+It passes an extra keyword parameter to the \fBpost_hook\fP method called \fBarchive_path\fP, which is the path to the generated tar file. See \fI\%pre_hook and post_hook methods passed arguments\fP\&.
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -515,9 +542,26 @@ All data keys are of type string and are optional unless specified otherwise.
 .IP \(bu 2
 \fBtar_compression_level\fP (\fBDefault\fP: \-7): A value between \-1 and \-9. This value is used to set environment variables used by \fBtar\fP (XZ_OPT, GZIP_OPT or BZIP2) to set a compression level. If no compression argument is defined in \fBtar_func_args\fP, the environment variables will not be set and \fBtar_compression_level\fP will not be used.
 .IP \(bu 2
-\fBtar_func_args\fP (\fBList\fP) (\fBDefault\fP: empty (no function arguments are passed to \fBtar\fP)): A list of function arguments used by the \fBtar\fP program. Possible values for the compression arguments are \fB\-\-xz\fP, \fB\-J\fP, \fB\-\-gzip\fP, \fB\-z\fP, \fB\-\-bzip2\fP or \fB\-j\fP\&. Do not use \fIold option style\fP, either use short options (e.g.: \fB\-j\fP) or long options (e.g.: \fB\-\-xz\fP). See \fI\%GNU tar manual\fP <\fBhttps://www.gnu.org/software/tar/manual/tar.html\fP>\&.
+\fBtar_func_args\fP (\fBList\fP) (\fBDefault\fP: empty (no extra function arguments are passed to \fBtar\fP)): A list of extra function arguments passed to the \fBtar\fP program. Possible values for the compression arguments are \fB\-\-xz\fP, \fB\-J\fP, \fB\-\-gzip\fP, \fB\-z\fP, \fB\-\-bzip2\fP or \fB\-j\fP\&. Do not use \fIold option style\fP, either use short options (e.g., \fB\-J\fP) or long options (e.g., \fB\-\-xz\fP). See \fI\%GNU tar manual\fP <\fBhttps://www.gnu.org/software/tar/manual/tar.html\fP>\&.
 .IP \(bu 2
-\fBtar_opt_args\fP (\fBList\fP): See \fI\%tar_local\fP\&.
+\fBtar_opt_args\fP (\fBList\fP) (\fBDefault\fP: empty (no extra option arguments are passed to \fBtar\fP)): Extra option arguments passed to the \fBtar\fP program.
+.UNINDENT
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+The final command that will be executed will look similar to the following:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+tar \-\-create [tar_func_args] \-\-file /path/to/destination/[destination_prefix]2018\-11\-22_05.42.06.846.tar[extension_depending_on_tar_func_args_passed] \-\-files\-from=/path/to/tmp/file/with/valid/generated/paths [tar_opt_args]
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .SS rsync_local
 .sp
@@ -530,6 +574,8 @@ This task uses the \fBrsync\fP command available on a system to create a mirror 
 This task can only backup folders.
 .IP \(bu 2
 Only local file system paths are allowed.
+.IP \(bu 2
+It doesn\(aqt pass an extra keyword parameter to the \fBpost_hook\fP method.
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -544,6 +590,24 @@ All data keys are of type string and are optional unless specified otherwise.
 .INDENT 0.0
 .IP \(bu 2
 \fBrsync_args\fP (\fBList\fP): Extra arguments passed to the \fBrsync\fP command.
+.UNINDENT
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+The final command that will be executed will look similar to the following:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+# The \-\-exclude arguments are dynamically added based on values defined in ignored_patterns settings.
+rsync [rsync_args] \-\-exclude=ptrn_1 \-\-exclude=ptrn_n /path/to/folder/to/mirror /path/to/mirror/destination
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .SH AUTHOR
 Odyseus
