@@ -135,7 +135,7 @@ class BaseTask():
             raise SystemExit(1)
 
         for item in set(self._task.get("items")):
-            item_path = os.path.expandvars(os.path.expanduser(item))
+            item_path = file_utils.expand_path(item)
 
             if os.path.exists(item_path) and not os.path.islink(item_path):
                 valid_items.append(item_path)
