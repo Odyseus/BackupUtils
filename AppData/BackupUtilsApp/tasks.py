@@ -43,9 +43,6 @@ _tar_comp_map = {
     "-j": _bzip2_map
 }
 
-_tar_comp_level_values = {"-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9",
-                          -1, -2, -3, -4, -5, -6, -7, -8, -9}
-
 
 class BaseTask():
     """Base task class.
