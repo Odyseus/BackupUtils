@@ -125,16 +125,13 @@ class Backup():
                                   icon=notification_icon, logger=self.logger)
 
         if self._settings.get("mail_notification"):
-            from . import mail_system
+            from .python_utils import mail_system
 
             mail_settings = self._settings.get("mail_settings")
 
             mail = mail_system.MailSystem(mail_settings=mail_settings, logger=self.logger)
-            subject = mail_settings.get("mail_subject", "Backup Utils Report")
 
-            mail_body = message + "\n" + mail_settings.get("mail_body", "")
-
-            mail.send(subject, mail_body)
+            mail.send("Backup Utils Report", message)
 
 
 if __name__ == "__main__":
