@@ -114,7 +114,7 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
             self.a["print_settings"]
         ]
 
-        super().__init__(__appname__, "UserData/logs")
+        super().__init__(__appname__)
 
         if self.a["--manual"]:
             self.action = self.display_manual_page
