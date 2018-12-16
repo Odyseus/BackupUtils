@@ -127,39 +127,76 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
                 self.logger.info("**System executable generation...**")
                 self.action = self.system_executable_generation
         elif self.a["backup"] and (self.a["--task"]):
+            # NOTE: All data should be validated BEFORE attempting to execute tasks.
+            from .python_utils import json_schema_utils
+            from .schemas import settings_schema
+            from .schemas import tasks_schema
+
             self.action = self.run_tasks
+
+            validation_errors_count = 0
 
             try:
                 if self.a.get("--global"):
-                    self.global_settings = run_path(
-                        os.path.join(root_folder,
-                                     "UserData",
-                                     "settings",
-                                     self.a["--global"] + ".py"
-                                     )
-                    ).get("settings", {})
+                    global_settings_file = os.path.join(root_folder,
+                                                        "UserData",
+                                                        "settings",
+                                                        "%s.py" % self.a["--global"])
+                    self.global_settings = run_path(global_settings_file).get("settings", {})
+
+                    validation_errors_count += json_schema_utils.validate(
+                        self.global_settings, settings_schema,
+                        raise_error=False,
+                        error_message_extra_info="\n".join([
+                            "**File:** %s" % global_settings_file,
+                            "**Data key:** settings"
+                        ]),
+                        logger=self.logger)
             except Exception as err:
                 self.logger.error("**Failure reading global settings file!**")
                 self.logger.error(err)
                 raise SystemExit(1)
 
             for tasks_file in list(OrderedDict.fromkeys(self.a["--task"])):
+                tasks_file_path = os.path.join(root_folder, "UserData",
+                                               "tasks", "%s.py" % tasks_file)
                 tasks_data = None
 
                 try:
-                    tasks_data = run_path(os.path.join(root_folder, "UserData",
-                                                       "tasks", "%s.py" % tasks_file))
+                    tasks_data = run_path(tasks_file_path)
 
                     if tasks_data:
                         task_settings = misc_utils.merge_dict(self.global_settings,
                                                               tasks_data.get("settings", {}),
                                                               logger=self.logger)
 
+                        validation_errors_count += json_schema_utils.validate(
+                            tasks_data.get("tasks", []), tasks_schema,
+                            # tasks_data.get("tasks", []), tasks_schema,
+                            raise_error=False,
+                            error_message_extra_info="\n".join([
+                                "**File:** %s" % tasks_file_path,
+                                "**Data key:** tasks"
+                            ]),
+                            logger=self.logger)
+
+                        validation_errors_count += json_schema_utils.validate(
+                            task_settings, settings_schema,
+                            raise_error=False,
+                            error_message_extra_info="\n".join([
+                                "**File:** %s" % tasks_file_path,
+                                "**Data key:** settings"
+                            ]),
+                            logger=self.logger)
+
                         for task in tasks_data.get("tasks", []):
                             self.tasks.append((task, task_settings))
                 except Exception as err:
-                    self.logger.error(tasks_file)
+                    self.logger.error(tasks_file_path)
                     self.logger.error(err)
+
+            if validation_errors_count > 0:
+                raise SystemExit(1)
 
     def run_tasks(self):
         """Run tasks.

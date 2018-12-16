@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Backup tasks.
 """
-import json
 import os
 import tempfile
 
@@ -53,12 +52,6 @@ class BaseTask():
         See <class :any:`LogSystem`>.
     """
     _cmd = None
-    _base_mandatory_keys = {
-        "name",
-        "type",
-        "destination",
-        "items"
-    }
 
     def __init__(self, task={}, settings={}, dry_run=False, logger=None):
         """Initialize.
@@ -109,27 +102,11 @@ class BaseTask():
         SystemExit
             Halt execution.
         """
-        missing_fields = []
-
-        if not self._base_mandatory_keys.issubset(self._task):
-            missing_fields += [field for field in self._base_mandatory_keys
-                               if field not in self._task]
-
-        if missing_fields:
-            self.logger.warning("Task:\n%s" % json.dumps(self._task, indent=4))
-            raise exceptions.MissingMandatoryField(
-                "The <%s> field/s is/are required." % ", ".join(missing_fields))
-
         if self._cmd is not None and not cmd_utils.which(self._cmd):
             raise exceptions.MissingCommand(self._cmd)
 
-        empty_list_items_msg = "Empty items list! Can't proceed! Leaving..."
         valid_items = []
         ignored_items = []
-
-        if not self._task.get("items"):
-            self.logger.error(empty_list_items_msg)
-            raise SystemExit(1)
 
         for item in set(self._task.get("items")):
             item_path = file_utils.expand_path(item)
@@ -141,7 +118,7 @@ class BaseTask():
                 ignored_items.append(item_path)
 
         if not valid_items:
-            self.logger.error(empty_list_items_msg)
+            self.logger.error("**Empty items list! Can't proceed! Leaving...**")
             raise SystemExit(1)
         else:
             self._task["items"] = sorted(valid_items)
@@ -232,7 +209,6 @@ class RsyncLocalTask(BaseTask):
             See <class :any:`BaseTask`>.
         """
         self._cmd = "rsync"
-        self._base_mandatory_keys.update({"rsync_args"})
         super().__init__(**kwargs)
 
     def run(self):
