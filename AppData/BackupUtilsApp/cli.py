@@ -124,7 +124,7 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
             self.action = self.print_settings
         elif self.a["generate"]:
             if self.a["system_executable"]:
-                self.logger.info("System executable generation...")
+                self.logger.info("**System executable generation...**")
                 self.action = self.system_executable_generation
         elif self.a["backup"] and (self.a["--task"]):
             self.action = self.run_tasks
@@ -139,7 +139,7 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
                                      )
                     ).get("settings", {})
             except Exception as err:
-                self.logger.error("Failure reading global settings file.")
+                self.logger.error("**Failure reading global settings file!**")
                 self.logger.error(err)
                 raise SystemExit(1)
 
@@ -172,9 +172,9 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
         try:
             if self.tasks:
                 for task, settings in self.tasks:
-                    self.logger.info(shell_utils.get_cli_separator(), date=False)
-                    self.logger.info("Running task: %s" % task.get("name", ""))
-                    self.logger.info("Task type: %s" % task.get("type", ""))
+                    self.logger.info("**%s**" % shell_utils.get_cli_separator(), date=False)
+                    self.logger.info("**Running task:** %s" % task.get("name", ""))
+                    self.logger.info("**Task type:** %s" % task.get("type", ""))
 
                     try:
                         backup_task = Backup(task=task,
@@ -182,7 +182,7 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
                                              dry_run=self.a["--dry-run"],
                                              logger=self.logger)
                     except Exception as err:
-                        self.logger.err(str(err))
+                        self.logger.err(err)
                         continue
                     else:
                         backup_task.run()

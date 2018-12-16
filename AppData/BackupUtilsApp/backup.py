@@ -106,7 +106,7 @@ class Backup():
         else:
             self.logger.success(message)
 
-        self.logger.info("Log file at:")
+        self.logger.info("**Log file at:**")
         self.logger.info(self.logger.get_log_file(), date=False)
 
         if self._settings.get("sound_notification", True):

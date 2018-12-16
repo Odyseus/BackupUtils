@@ -89,13 +89,13 @@ class BaseTask():
         """Report called process errors.
         """
         if self._errors:
-            self.logger.warning("Errors have been found!")
+            self.logger.warning("**Errors have been found!**")
 
             for err in self._errors:
                 self._errors_count += 1
-                self.logger.error("Command: %s" % str(err.cmd))
-                self.logger.error("STDERR:\n%s" % str(err.stderr))
-                self.logger.error("STDOUT:\n%s" % str(err.stdout))
+                self.logger.error("**Command:** %s" % str(err.cmd))
+                self.logger.error("**STDERR:**\n%s" % str(err.stderr))
+                self.logger.error("**STDOUT:**\n%s" % str(err.stdout))
 
     def _validate_task(self):
         """Validate task.
@@ -148,8 +148,8 @@ class BaseTask():
 
         # If there are ignored items, log them all at once.
         if ignored_items:
-            self.logger.warning("Invalid items found.")
-            self.logger.warning("They weren't added to the backup list:\n%s" %
+            self.logger.warning("**Invalid items found**")
+            self.logger.warning("**They weren't added to the backup list:**\n%s" %
                                 "\n".join(ignored_items))
 
     def start(self):
@@ -189,7 +189,7 @@ class BaseTask():
         hook = self._task.get("%s_hook" % hook_type)
 
         if isinstance(hook, Callable):
-            self.logger.info("Attempting to run %s-hook." % hook_type)
+            self.logger.info("**Attempting to run %s-hook...**" % hook_type)
 
             task_copy = deepcopy(self._task)
 
@@ -204,7 +204,7 @@ class BaseTask():
                 self.logger.error(err)
                 raise SystemExit(1)
         else:
-            self.logger.info("%s-hook not configured." % hook_type.capitalize())
+            self.logger.info("**%s-hook not configured.**" % hook_type.capitalize())
 
     def run(self):
         """Run a backup task.
@@ -246,7 +246,7 @@ class RsyncLocalTask(BaseTask):
         cmd += exclude_patterns
 
         if self._dry_run:
-            self.logger.log_dry_run("Destination folder will be created:\n%s" % root_destination)
+            self.logger.log_dry_run("**Destination folder will be created:**\n%s" % root_destination)
         else:
             os.makedirs(root_destination, exist_ok=True)
 
@@ -263,10 +263,10 @@ class RsyncLocalTask(BaseTask):
                 final_cmd = " ".join(cmd + [shell_quote(source_item),
                                             shell_quote(item_destination)])
 
-                self.logger.info("Mirroring: %s" % source_item, date=False)
+                self.logger.info("**Mirroring:** %s" % source_item, date=False)
 
                 if self._dry_run:
-                    self.logger.log_dry_run("Command that will be executed:\n%s" % final_cmd)
+                    self.logger.log_dry_run("**Command that will be executed:**\n%s" % final_cmd)
                 else:
                     try:
                         start_time = misc_utils.get_date_time()
@@ -282,13 +282,13 @@ class RsyncLocalTask(BaseTask):
 
                         finished_time = misc_utils.get_date_time()
                         elapsed_time = misc_utils.get_time_diff(start_time, finished_time)
-                        self.logger.info("Elapsed time: %s" % elapsed_time, date=False)
+                        self.logger.info("**Elapsed time:** %s" % elapsed_time, date=False)
                     except CalledProcessError as err:
                         self._errors.append(err)
                         continue
             else:
                 self._warnings_count += 1
-                self.logger.warning("Omitted path. Not a directory:")
+                self.logger.warning("**Omitted path. Not a directory:**")
                 self.logger.warning(source_item)
 
 
@@ -351,7 +351,7 @@ class TarLocalTask(BaseTask):
                                     archive_file_name + archive_file_ext)
 
         if self._dry_run:
-            self.logger.log_dry_run("Destination folder will be created:\n%s" % archive_destination)
+            self.logger.log_dry_run("**Destination folder will be created:**\n%s" % archive_destination)
         else:
             os.makedirs(archive_destination, exist_ok=True)
 
@@ -372,7 +372,7 @@ class TarLocalTask(BaseTask):
             ] + self._task.get("tar_opt_args", [])
 
             if self._dry_run:
-                self.logger.log_dry_run("Command that will be executed:\n%s" % " ".join(cmd))
+                self.logger.log_dry_run("**Command that will be executed:**\n%s" % " ".join(cmd))
             else:
                 try:
                     cmd_utils.run_cmd(cmd,
