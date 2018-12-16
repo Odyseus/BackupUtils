@@ -40,42 +40,6 @@ Elapsed Time: {elapsed}
 """
 
 
-class InvalidCompressionLevel(exceptions.ExceptionWhitoutTraceBack):
-    """InvalidCompressionLevel
-    """
-
-    def __init__(self, selected_comp_level):
-        """Initialize.
-
-        Parameters
-        ----------
-        selected_comp_level : str
-            Invalid compression level.
-        """
-        msg = "%s is an invalid compression level. Valid values are from -1 to -9." % \
-            str(selected_comp_level)
-        print("")
-        super().__init__(msg=msg)
-
-
-class InvalidCompressionType(exceptions.ExceptionWhitoutTraceBack):
-    """InvalidCompressionType
-    """
-
-    def __init__(self, selected_comp_type):
-        """Initialize.
-
-        Parameters
-        ----------
-        selected_comp_type : str
-            Invalid compression type.
-        """
-        msg = "%s is an invalid compression type. Valid values are 'xz', 'gzip' or 'bzip2'." % \
-            str(selected_comp_type)
-        print("")
-        super().__init__(msg=msg)
-
-
 class InvalidTaskName(exceptions.ExceptionWhitoutTraceBack):
     """InvalidTaskName
     """
