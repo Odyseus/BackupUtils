@@ -144,14 +144,15 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
                                                         "%s.py" % self.a["--global"])
                     self.global_settings = run_path(global_settings_file).get("settings", {})
 
-                    validation_errors_count += json_schema_utils.validate(
-                        self.global_settings, settings_schema,
-                        raise_error=False,
-                        error_message_extra_info="\n".join([
-                            "**File:** %s" % global_settings_file,
-                            "**Data key:** settings"
-                        ]),
-                        logger=self.logger)
+                    if json_schema_utils.JSONSCHEMA_INSTALLED:
+                        validation_errors_count += json_schema_utils.validate(
+                            self.global_settings, settings_schema,
+                            raise_error=False,
+                            error_message_extra_info="\n".join([
+                                "**File:** %s" % global_settings_file,
+                                "**Data key:** settings"
+                            ]),
+                            logger=self.logger)
             except Exception as err:
                 self.logger.error("**Failure reading global settings file!**")
                 self.logger.error(err)
@@ -170,24 +171,25 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
                                                               tasks_data.get("settings", {}),
                                                               logger=self.logger)
 
-                        validation_errors_count += json_schema_utils.validate(
-                            tasks_data.get("tasks", []), tasks_schema,
-                            # tasks_data.get("tasks", []), tasks_schema,
-                            raise_error=False,
-                            error_message_extra_info="\n".join([
-                                "**File:** %s" % tasks_file_path,
-                                "**Data key:** tasks"
-                            ]),
-                            logger=self.logger)
+                        if json_schema_utils.JSONSCHEMA_INSTALLED:
+                            validation_errors_count += json_schema_utils.validate(
+                                tasks_data.get("tasks", []), tasks_schema,
+                                # tasks_data.get("tasks", []), tasks_schema,
+                                raise_error=False,
+                                error_message_extra_info="\n".join([
+                                    "**File:** %s" % tasks_file_path,
+                                    "**Data key:** tasks"
+                                ]),
+                                logger=self.logger)
 
-                        validation_errors_count += json_schema_utils.validate(
-                            task_settings, settings_schema,
-                            raise_error=False,
-                            error_message_extra_info="\n".join([
-                                "**File:** %s" % tasks_file_path,
-                                "**Data key:** settings"
-                            ]),
-                            logger=self.logger)
+                            validation_errors_count += json_schema_utils.validate(
+                                task_settings, settings_schema,
+                                raise_error=False,
+                                error_message_extra_info="\n".join([
+                                    "**File:** %s" % tasks_file_path,
+                                    "**Data key:** settings"
+                                ]),
+                                logger=self.logger)
 
                         for task in tasks_data.get("tasks", []):
                             self.tasks.append((task, task_settings))
