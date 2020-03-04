@@ -1,6 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """Schemas for JSON data validation.
+
+Attributes
+----------
+settings_schema : dict
+    JSON schema.
+tasks_schema : dict
+    JSON schema.
 """
 tasks_schema = {
     "description": "Schema to validate the 'tasks' property inside a UserData/tasks/<tasks-file-name>.py file.",

@@ -97,8 +97,6 @@ class BaseTask():
         ------
         exceptions.MissingCommand
             See :any:`exceptions.MissingCommand`.
-        exceptions.MissingMandatoryField
-            See :any:`exceptions.MissingMandatoryField`.
         SystemExit
             Halt execution.
         """
