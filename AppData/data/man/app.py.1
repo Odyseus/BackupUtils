@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "APP.PY" "1" "Feb 19, 2020" "" "Backup Utils"
+.TH "APP.PY" "1" "Mar 04, 2020" "" "Backup Utils"
 .SH NAME
 app.py \- CLI utility to backup files on GNU/Linux.
 .
@@ -200,6 +200,7 @@ A tasks file is a Python script containing at least a property called \fBtasks\f
 .sp
 .nf
 .ft C
+# START tasks_example.py
 #!/usr/bin/python3
 # \-*\- coding: utf\-8 \-*\-
 """Tasks example file.
@@ -308,6 +309,7 @@ tasks = [
 
 if __name__ == "__main__":
     pass
+# END tasks_example.py
 
 .ft P
 .fi
@@ -398,6 +400,7 @@ The \fBpre_hook\fP and \fBpost_hook\fP keys are removed to avoid accidental infi
 .sp
 .nf
 .ft C
+# START settings_example.py
 #!/usr/bin/python3
 # \-*\- coding: utf\-8 \-*\-
 """Global settings example file.
@@ -446,6 +449,7 @@ settings = {
 
 if __name__ == "__main__":
     pass
+# END settings_example.py
 
 .ft P
 .fi
