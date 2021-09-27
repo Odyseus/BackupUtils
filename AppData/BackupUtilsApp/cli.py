@@ -263,12 +263,12 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
         self._display_manual_page(os.path.join(root_folder, "AppData", "data", "man", "app.py.1"))
 
     def print_tasks(self):
-        """See :any:`app_utils.print_config_files_list`.
+        """See :any:`BackupUtilsApp.app_utils.print_config_files_list`.
         """
         app_utils.print_config_files_list("tasks")
 
     def print_settings(self):
-        """See :any:`app_utils.print_config_files_list`.
+        """See :any:`BackupUtilsApp.app_utils.print_config_files_list`.
         """
         app_utils.print_config_files_list("settings")
 
