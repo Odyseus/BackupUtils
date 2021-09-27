@@ -1,0 +1,89 @@
+additionalItems: true
+description: Schema to validate the 'tasks' property inside a UserData/tasks/<tasks-file-name>.py
+    file.
+items:
+    additionalProperties: false
+    properties:
+        destination:
+            description: Absolute path to where the backup files or folders will be stored.
+            type: string
+        destination_prefix:
+            description: A string that will be added to the backed up files/folders.
+            type: string
+        items:
+            description: The list of paths to backup.
+            items:
+                minItems: 1
+                type: string
+            type: array
+        name:
+            description: Task name.
+            type: string
+        post_hook:
+            description: A Python function to be executed **AFTER** a backup job is performed.
+                It has to be defined like so **<module_name.method_name>**. **<module_name>** shoud be a
+                file located at **UserData/hooks/<module_name>.py**. **<method_name>** should be
+                a function defined inside the **UserData/hooks/<module_name>.py** file.
+            type: string
+        pre_hook:
+            description: A Python function to be executed **BEFORE** a backup job is performed.
+                It has to be defined like so **<module_name.method_name>**. **<module_name>** shoud be a
+                file located at **UserData/hooks/<module_name>.py**. **<method_name>** should be
+                a function defined inside the **UserData/hooks/<module_name>.py** file.
+            type: string
+        rsync_args:
+            description: Extra arguments passed to the ``rsync`` command.
+            items:
+                anyOf:
+                    - type: string
+            type: array
+        tar_compression_level:
+            description: A string that will be added to the backed up files/folders.
+            enum:
+                - "-1"
+                - "-2"
+                - "-3"
+                - "-4"
+                - "-5"
+                - "-6"
+                - "-7"
+                - "-8"
+                - "-9"
+                - -1
+                - -2
+                - -3
+                - -4
+                - -5
+                - -6
+                - -7
+                - -8
+                - -9
+        tar_func_args:
+            description: A list of extra function arguments passed to the ``tar`` program.
+            items:
+                anyOf:
+                    - enum:
+                          - --xz
+                          - -J
+                          - --gzip
+                          - -z
+                          - --bzip2
+                          - -j
+            type: array
+        tar_opt_args:
+            description: Extra option arguments passed to the ``tar`` program.
+            items:
+                anyOf:
+                    - type: string
+            type: array
+        type:
+            description: Task type.
+            type: string
+    required:
+        - type
+        - name
+        - destination
+        - items
+    type: object
+minItems: 1
+type: array

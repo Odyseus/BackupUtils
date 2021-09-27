@@ -1,0 +1,29 @@
+desktop_notification: true
+ignored_patterns:
+    - .git
+    - __000__
+    - "*-lock"
+    - "*.bak"
+    - "*.log"
+    - "*.pyc"
+    - .parentlock
+    - lock
+    - __pycache__
+    - "*.sublime-workspace"
+mail_notification: false
+mail_settings:
+    ask_for_password: false
+    mail_body: ""
+    mail_subject: Backup Utils report
+    mailing_list:
+        - user_name1@gmail.com
+        - user_name2@yahoo.com
+        - user_name3@example.com
+    secret_service_name: secret_service_name
+    secret_user_name: secret_user_name
+    sender_address: user_name@gmail.com
+    sender_username: user_name@gmail.com
+    smtp_port: 587
+    smtp_server: smtp.gmail.com
+    use_tls: true
+sound_notification: true

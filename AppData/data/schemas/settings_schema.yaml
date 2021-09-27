@@ -1,0 +1,27 @@
+additionalProperties: false
+description: Schema to validate the 'settings' property inside a UserData/tasks/<tasks-file-name>.py
+    or UserData/settings/<settings-file-name>.py files.
+properties:
+    desktop_notification:
+        default: true
+        description: Whether to display a desktop notification or not after a backup job
+            is finished.
+        type: boolean
+    ignored_patterns:
+        description: A list of file patterns to exclude from a backup job.
+        items:
+            anyOf:
+                - type: string
+        type: array
+    mail_notification:
+        default: false
+        description: Whether to send a report via e-mail or not after a backup job is
+            finished.
+        type: boolean
+    mail_settings:
+        type: object
+    sound_notification:
+        default: true
+        description: Whether to play a sound or not after a backup job is finished.
+        type: boolean
+type: object

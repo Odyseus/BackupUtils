@@ -14,7 +14,6 @@ root_folder : str
 import os
 
 from collections import OrderedDict
-from runpy import run_path
 
 from . import app_utils
 from .__init__ import __appdescription__
@@ -26,6 +25,7 @@ from .python_utils import cli_utils
 from .python_utils import exceptions
 from .python_utils import misc_utils
 from .python_utils import shell_utils
+from .python_utils import yaml_utils
 
 root_folder = os.path.realpath(os.path.abspath(os.path.join(
     os.path.normpath(os.getcwd()))))
@@ -56,12 +56,12 @@ Options:
 
 -t <name>, --task=<name>
     File name of the file containing backup tasks. Should be the name of a
-    file stored in UserData/tasks/<name>.py. Extension omitted.
+    file stored in UserData/tasks/<name>.yaml. Extension omitted.
 
 -g <name>, --global=<name>
     File name of a file containing global settings that all the backup tasks
     will use. Should be the name of a file stored in
-    UserData/settings/<name>.py. Extension omitted.
+    UserData/settings/<name>.yaml. Extension omitted.
 
 -d, --dry-run
     Do not perform file system changes. Only display messages informing of the
@@ -129,20 +129,30 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
         elif self.a["backup"] and (self.a["--task"]):
             # NOTE: All data should be validated BEFORE attempting to execute tasks.
             from .python_utils import json_schema_utils
-            from .schemas import settings_schema
-            from .schemas import tasks_schema
+            settings_schema = os.path.join(root_folder,
+                                           "AppData",
+                                           "data",
+                                           "schemas",
+                                           "settings_schema.yaml")
+            tasks_schema = os.path.join(root_folder,
+                                        "AppData",
+                                        "data",
+                                        "schemas",
+                                        "tasks_schema.yaml")
 
             self.action = self.run_tasks
 
             validation_errors_count = 0
 
             try:
-                if self.a.get("--global"):
+                if self.a["--global"]:
                     global_settings_file = os.path.join(root_folder,
                                                         "UserData",
                                                         "settings",
-                                                        "%s.py" % self.a["--global"])
-                    self.global_settings = run_path(global_settings_file).get("settings", {})
+                                                        "%s.yaml" % self.a["--global"])
+                    print(global_settings_file)
+                    with open(global_settings_file, "r") as yaml_file:
+                        self.global_settings = yaml_utils.load(yaml_file)
 
                     if json_schema_utils.JSONSCHEMA_INSTALLED:
                         validation_errors_count += json_schema_utils.validate(
@@ -160,11 +170,12 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
 
             for tasks_file in list(OrderedDict.fromkeys(self.a["--task"])):
                 tasks_file_path = os.path.join(root_folder, "UserData",
-                                               "tasks", "%s.py" % tasks_file)
+                                               "tasks", "%s.yaml" % tasks_file)
                 tasks_data = None
 
                 try:
-                    tasks_data = run_path(tasks_file_path)
+                    with open(tasks_file_path, "r") as yaml_file:
+                        tasks_data = yaml_utils.load(yaml_file)
 
                     if tasks_data:
                         task_settings = misc_utils.merge_dict(self.global_settings,
@@ -174,7 +185,6 @@ class CommandLineInterface(cli_utils.CommandLineInterfaceSuper):
                         if json_schema_utils.JSONSCHEMA_INSTALLED:
                             validation_errors_count += json_schema_utils.validate(
                                 tasks_data.get("tasks", []), tasks_schema,
-                                # tasks_data.get("tasks", []), tasks_schema,
                                 raise_error=False,
                                 error_message_extra_info="\n".join([
                                     "**File:** %s" % tasks_file_path,

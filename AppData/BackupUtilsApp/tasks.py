@@ -4,6 +4,7 @@
 """
 import os
 import tempfile
+import importlib
 
 from collections import Callable
 from copy import deepcopy
@@ -161,23 +162,39 @@ class BaseTask():
         SystemExit
             Halt execution if an exception is thrown when executing a hook.
         """
-        hook = self._task.get("%s_hook" % hook_type)
+        hook_definition = self._task.get("%s_hook" % hook_type)
 
-        if isinstance(hook, Callable):
+        if not hook_definition:
+            return
+
+        hook_module_name, hook_method = hook_definition.split(".")
+        hook_module_path = os.path.join(app_utils.root_folder,
+                                        "UserData",
+                                        "hooks",
+                                        hook_module_name + ".py")
+
+        if os.path.exists(hook_module_path):
             self.logger.info("**Attempting to run %s-hook...**" % hook_type)
 
-            task_copy = deepcopy(self._task)
+            spec = importlib.util.spec_from_file_location(hook_module_name, hook_module_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
 
-            for key in ["pre_hook", "post_hook"]:
-                if key in task_copy:
-                    del task_copy[key]
+            hook = getattr(module, hook_method)
 
-            try:
-                hook(task=task_copy, settings=self._settings,
-                     dry_run=self._dry_run, logger=self.logger, **kwargs)
-            except Exception as err:
-                self.logger.error(err)
-                raise SystemExit(1)
+            if isinstance(hook, Callable):
+                task_copy = deepcopy(self._task)
+
+                for key in ["pre_hook", "post_hook"]:
+                    if key in task_copy:
+                        del task_copy[key]
+
+                try:
+                    hook(task=task_copy, settings=self._settings,
+                         dry_run=self._dry_run, logger=self.logger, **kwargs)
+                except Exception as err:
+                    self.logger.error(err)
+                    raise SystemExit(1)
         else:
             self.logger.info("**%s-hook not configured.**" % hook_type.capitalize())
 
@@ -220,7 +237,9 @@ class RsyncLocalTask(BaseTask):
         cmd += exclude_patterns
 
         if self._dry_run:
-            self.logger.log_dry_run("**Destination folder will be created:**\n%s" % root_destination)
+            self.logger.log_dry_run(
+                "**Destination folder will be created:**\n%s" %
+                root_destination)
         else:
             os.makedirs(root_destination, exist_ok=True)
 
@@ -325,7 +344,9 @@ class TarLocalTask(BaseTask):
                                     archive_file_name + archive_file_ext)
 
         if self._dry_run:
-            self.logger.log_dry_run("**Destination folder will be created:**\n%s" % archive_destination)
+            self.logger.log_dry_run(
+                "**Destination folder will be created:**\n%s" %
+                archive_destination)
         else:
             os.makedirs(archive_destination, exist_ok=True)
 

@@ -1,0 +1,49 @@
+settings: {}
+##########################################################
+# See settings_example.yaml file.                        #
+# If a global settings file is used in the command line, #
+# the settings defined inside this tasks file will       #
+# override the global settings.                          #
+# See documentation/manual for details.                  #
+# ########################################################
+tasks:
+    # #################################
+    # Tar task for local file systems #
+    # #################################
+    - destination: /path/to/a/folder
+      destination_prefix: MyHome-
+      items:
+          - /absolute/path/to/a/folder
+          - /absolute/path/to/a/file
+          - ~/relative/path/to/a/folder/inside/user/home
+          - ~/relative/path/to/a/file/inside/user/home
+      name: Descriptive name for this task
+      post_hook: hooks_example.post_hook
+      pre_hook: hooks_example.pre_hook
+      tar_compression_level: "-7"
+      tar_func_args:
+          - --xz
+      tar_opt_args:
+          - --totals
+          - --record-size=1M
+          - --checkpoint=50
+          - --checkpoint-action=echo="%T"
+      type: tar_local
+    # ###################################
+    # Rsync task for local file systems #
+    # ###################################
+    - destination: /path/to/a/folder
+      items:
+          - /absolute/path/to/a/folder
+          - ~/relative/path/to/a/folder/inside/user/home
+      name: Descriptive name for this task
+      post_hook: hooks_example.post_hook
+      pre_hook: hooks_example.pre_hook
+      rsync_args:
+          - --archive
+          - --delete
+          - --keep-dirlinks
+          - --delete-excluded
+          - --delete-delay
+          - --info=progress2
+      type: rsync_local

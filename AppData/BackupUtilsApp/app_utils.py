@@ -121,14 +121,15 @@ def print_config_files_list(file_type):
     """
     # FUTURE:
     # Use context manager with os.scandir().
-    list_of_files = [entry.name for entry in os.scandir(_paths_map[file_type]) if
-                     entry.is_file(follow_symlinks=False)]
+    list_of_files = sorted([entry.name for entry in os.scandir(_paths_map[file_type]) if
+                            all((entry.is_file(follow_symlinks=False),
+                                 (entry.name.endswith(".yaml") or
+                                entry.name.endswith(".yml"))
+                                 ))])
 
     for f in list_of_files:
         name, ext = os.path.splitext(f)
-
-        if ext == ".py":
-            print(name)
+        print(name)
 
 
 class FilteredFilesList():
