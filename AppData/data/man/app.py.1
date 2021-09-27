@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "APP.PY" "1" "Mar 20, 2020" "" "Backup Utils"
+.TH "APP.PY" "1" "Sep 27, 2021" "" "Backup Utils"
 .SH NAME
 app.py \- CLI utility to backup files on GNU/Linux.
 .
@@ -63,7 +63,9 @@ No mayor requirements are needed to run this application other than Python 3.5+.
 .IP "Mail system optional requirement"
 .INDENT 0.0
 .IP \(bu 2
-\fBkeyring\fP module.
+\fBkeyring\fP Python module.
+.IP \(bu 2
+\fBjsonschema>3\fP Python module.
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -101,6 +103,7 @@ keyring.get_password("backup_secret_service_name", "backup_secret_user_name")
 .sp
 .nf
 .ft C
+source
 username: backup_secret_user_name
 application: python\-keyring
 service: backup_secret_service_name
@@ -108,6 +111,9 @@ service: backup_secret_service_name
 .fi
 .UNINDENT
 .UNINDENT
+.SS \fBjsonschema\fP module
+.sp
+The \fBjsonschema\fP module is used to validate all data used by this CLI application. If not installed, the data will simply not be validated.
 .SH DETAILED USAGE
 .sp
 \fBWARNING:\fP
@@ -121,9 +127,11 @@ Always use the \fB\-\-dry\-run\fP CLI option to see the exact command/s that wil
 .IP "Highlights"
 .INDENT 0.0
 .IP \(bu 2
-Backup tasks are read from configuration files located in \fBUserData/tasks/*.py\fP\&.
+Backup tasks are read from configuration files located in \fBUserData/tasks/*.yaml\fP\&.
 .IP \(bu 2
-Global settings are read from configuration files located in \fBUserData/settings/*.py\fP\&.
+Global settings are read from configuration files located in \fBUserData/settings/*.yaml\fP\&.
+.IP \(bu 2
+Pre/Post hooks are executed from Python scripts located in \fBUserData/hooks/*.py\fP\&. See \fI\%pre_hook and post_hook definitions\fP\&.
 .IP \(bu 2
 Each tasks file can have defined their own settings and contain one or more backup tasks of any type.
 .UNINDENT
@@ -145,9 +153,9 @@ The main command to perform backup tasks.
 .SS Options
 .INDENT 0.0
 .IP \(bu 2
-\fB\-t <name>\fP or \fB\-\-task=<name>\fP: File name of the file containing the backup tasks. Should be the name of a file stored in \fBUserData/tasks/<name>.py\fP\&. Extension omitted.
+\fB\-t <name>\fP or \fB\-\-task=<name>\fP: File name of the file containing the backup tasks. Should be the name of a file stored in \fBUserData/tasks/<name>.yaml\fP\&. Extension omitted.
 .IP \(bu 2
-\fB\-g <name>\fP or \fB\-\-global=<name>\fP: File name of the file containing the global settings that all the backup tasks will use. Should be the name of a file stored in \fBUserData/settings/<name>.py\fP\&. Extension omitted.
+\fB\-g <name>\fP or \fB\-\-global=<name>\fP: File name of the file containing the global settings that all the backup tasks will use. Should be the name of a file stored in \fBUserData/settings/<name>.yaml\fP\&. Extension omitted.
 .IP \(bu 2
 \fB\-d\fP or \fB\-\-dry\-run\fP: Do not perform file system changes. Only display messages informing of the actions that will be performed or commands that will be executed.
 .INDENT 2.0
@@ -194,122 +202,63 @@ Always use the \fB\-\-dry\-run\fP CLI option to see the exact command/s that wil
 .UNINDENT
 .SS Task example file
 .sp
-A tasks file is a Python script containing at least a property called \fBtasks\fP (mandatory). The \fBtasks\fP property must be a list of dictionaries, each dictionary representing a backup task.
+A tasks file is a YAML file containing at least a property called \fBtasks\fP (mandatory). The \fBtasks\fP property must be a list of dictionaries, each dictionary representing a backup task.
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-# START tasks_example.py
-#!/usr/bin/python3
-# \-*\- coding: utf\-8 \-*\-
-"""Tasks example file.
-
-Attributes
-\-\-\-\-\-\-\-\-\-\-
-settings : dict, optional
-    See documentation/manual for details.
-tasks : dict, mandatory
-    See documentation/manual for details.
-"""
-
-
-def __pre_hook(**kwargs):
-    """Pre\-task hook.
-
-    Function that will be executed BEFORE a backup task is performed.
-
-    Parameters
-    \-\-\-\-\-\-\-\-\-\-
-    **kwargs
-        Keyword arguments passed. See documentation/manual for details.
-    """
-    for key, value in kwargs.items():
-        print(key + " = " + repr(value))
-
-
-def __post_hook(**kwargs):
-    """Post\-task hook.
-
-    Function that will be executed AFTER a backup task is performed.
-
-    Parameters
-    \-\-\-\-\-\-\-\-\-\-
-    **kwargs
-        Keyword arguments passed. See documentation/manual for details.
-    """
-    for key, value in kwargs.items():
-        print(key + " = " + repr(value))
-
-
-settings = {
-    ##########################################################
-    # See settings_example.py file.                          #
-    # If a global settings file is used in the command line, #
-    # the settings defined inside this tasks file will       #
-    # override the global settings.                          #
-    # See documentation/manual for details.                  #
-    # ########################################################
-}
-
-
-tasks = [
+# START tasks_example.yaml
+settings: {}
+##########################################################
+# See settings_example.yaml file.                        #
+# If a global settings file is used in the command line, #
+# the settings defined inside this tasks file will       #
+# override the global settings.                          #
+# See documentation/manual for details.                  #
+# ########################################################
+tasks:
     # #################################
     # Tar task for local file systems #
     # #################################
-    {
-        "type": "tar_local",
-        "name": "Descriptive name for this task",
-        "destination": "/path/to/a/folder",
-        "destination_prefix": "MyHome\-",
-        "tar_compression_level": "\-7",
-        # WARNING!
-        # DO NOT USE GROUPED FUNCTION ARGUMENTS (A.K.A Old Option Style)!
-        # Read the documentation/manual for details.
-        "tar_func_args": ["\-\-xz"],
-        "tar_opt_args": [
-            "\-\-totals",
-            "\-\-record\-size=1M",
-            "\-\-checkpoint=50",
-            \(aq\-\-checkpoint\-action=echo="%T"\(aq,
-        ],
-        "pre_hook": __pre_hook,
-        "post_hook": __post_hook,
-        "items": [
-            "/absolute/path/to/a/folder",
-            "/absolute/path/to/a/file",
-            "~/relative/path/to/a/folder/inside/user/home",
-            "~/relative/path/to/a/file/inside/user/home"
-        ]
-    },
+    \- destination: /path/to/a/folder
+      destination_prefix: MyHome\-
+      items:
+          \- /absolute/path/to/a/folder
+          \- /absolute/path/to/a/file
+          \- ~/relative/path/to/a/folder/inside/user/home
+          \- ~/relative/path/to/a/file/inside/user/home
+      name: Descriptive name for this task
+      post_hook: hooks_example.post_hook
+      pre_hook: hooks_example.pre_hook
+      tar_compression_level: "\-7"
+      tar_func_args:
+          \- \-\-xz
+      tar_opt_args:
+          \- \-\-totals
+          \- \-\-record\-size=1M
+          \- \-\-checkpoint=50
+          \- \-\-checkpoint\-action=echo="%T"
+      type: tar_local
     # ###################################
     # Rsync task for local file systems #
     # ###################################
-    {
-        "type": "rsync_local",
-        "name": "Descriptive name for this task",
-        "rsync_args": [
-            "\-\-archive",
-            "\-\-delete",
-            "\-\-keep\-dirlinks",
-            "\-\-delete\-excluded",
-            "\-\-delete\-delay",
-            "\-\-info=progress2"
-        ],
-        "destination": "/path/to/a/folder",
-        "pre_hook": __pre_hook,
-        "post_hook": __post_hook,
-        "items": [
-            "/absolute/path/to/a/folder",
-            "~/relative/path/to/a/folder/inside/user/home"
-        ]
-    }
-]
-
-
-if __name__ == "__main__":
-    pass
-# END tasks_example.py
+    \- destination: /path/to/a/folder
+      items:
+          \- /absolute/path/to/a/folder
+          \- ~/relative/path/to/a/folder/inside/user/home
+      name: Descriptive name for this task
+      post_hook: hooks_example.post_hook
+      pre_hook: hooks_example.pre_hook
+      rsync_args:
+          \- \-\-archive
+          \- \-\-delete
+          \- \-\-keep\-dirlinks
+          \- \-\-delete\-excluded
+          \- \-\-delete\-delay
+          \- \-\-info=progress2
+      type: rsync_local
+# END tasks_example.yaml
 
 .ft P
 .fi
@@ -366,7 +315,11 @@ Environment variables will also be expanded (e.g., \fB/home/$USER/.config\fP wil
 .INDENT 3.5
 .INDENT 0.0
 .INDENT 3.5
-.IP "\fBpre_hook\fP and \fBpost_hook\fP methods passed arguments"
+.IP "\fBpre_hook\fP and \fBpost_hook\fP definitions"
+.sp
+The \fBpre_hook\fP and \fBpost_hook\fP methods have to be defined like so \fBmodule_name.method_name\fP\&. \fBmodule_name\fP shoud be a file located at \fBUserData/hooks/module_name.py\fP\&. \fBmethod_name\fP should be a function defined inside the \fBUserData/hooks/module_name.py\fP file.
+.sp
+Arguments passed:
 .INDENT 0.0
 .IP \(bu 2
 \fBtask\fP: A modified copy of the task object that was used to run the backup job. Modifications:
@@ -400,56 +353,37 @@ The \fBpre_hook\fP and \fBpost_hook\fP keys are removed to avoid accidental infi
 .sp
 .nf
 .ft C
-# START settings_example.py
-#!/usr/bin/python3
-# \-*\- coding: utf\-8 \-*\-
-"""Global settings example file.
-
-Attributes
-\-\-\-\-\-\-\-\-\-\-
-settings : dict, mandatory
-    See documentation/manual for details.
-"""
-
-settings = {
-    "sound_notification": True,
-    "desktop_notification": True,
-    "mail_notification": False,
-    "mail_settings": {
-        "ask_for_password": False,
-        "smtp_server": "smtp.gmail.com",
-        "smtp_port": 587,
-        "sender_address": "user_name@gmail.com",
-        "sender_username": "user_name@gmail.com",
-        "secret_service_name": "secret_service_name",
-        "secret_user_name": "secret_user_name",
-        "use_tls": True,
-        "mail_subject": "Backup Utils report",
-        "mail_body": "",
-        "mailing_list": [
-            "user_name1@gmail.com",
-            "user_name2@yahoo.com",
-            "user_name3@example.com",
-        ],
-    },
-    "ignored_patterns": [
-        ".git",
-        "__000__",
-        "*\-lock",
-        "*.bak",
-        "*.log",
-        "*.pyc",
-        ".parentlock",
-        "lock",
-        "__pycache__",
-        "*.sublime\-workspace",
-    ]
-}
-
-
-if __name__ == "__main__":
-    pass
-# END settings_example.py
+# START settings_example.yaml
+desktop_notification: true
+ignored_patterns:
+    \- .git
+    \- __000__
+    \- "*\-lock"
+    \- "*.bak"
+    \- "*.log"
+    \- "*.pyc"
+    \- .parentlock
+    \- lock
+    \- __pycache__
+    \- "*.sublime\-workspace"
+mail_notification: false
+mail_settings:
+    ask_for_password: false
+    mail_body: ""
+    mail_subject: Backup Utils report
+    mailing_list:
+        \- user_name1@gmail.com
+        \- user_name2@yahoo.com
+        \- user_name3@example.com
+    secret_service_name: secret_service_name
+    secret_user_name: secret_user_name
+    sender_address: user_name@gmail.com
+    sender_username: user_name@gmail.com
+    smtp_port: 587
+    smtp_server: smtp.gmail.com
+    use_tls: true
+sound_notification: true
+# END settings_example.yaml
 
 .ft P
 .fi
@@ -530,7 +464,7 @@ This task can backup files and folders.
 .IP \(bu 2
 Only local file system paths are allowed.
 .IP \(bu 2
-It passes an extra keyword parameter to the \fBpost_hook\fP method called \fBarchive_path\fP, which is the path to the generated tar file. See \fI\%pre_hook and post_hook methods passed arguments\fP\&.
+It passes an extra keyword parameter to the \fBpost_hook\fP method called \fBarchive_path\fP, which is the path to the generated tar file. See \fI\%pre_hook and post_hook definitions\fP\&.
 .UNINDENT
 .UNINDENT
 .UNINDENT
@@ -616,6 +550,6 @@ rsync [rsync_args] \-\-exclude=ptrn_1 \-\-exclude=ptrn_n /path/to/folder/to/mirr
 .SH AUTHOR
 Odyseus
 .SH COPYRIGHT
-2016-2020, Odyseus.
+2016-2021, Odyseus.
 .\" Generated by docutils manpage writer.
 .
