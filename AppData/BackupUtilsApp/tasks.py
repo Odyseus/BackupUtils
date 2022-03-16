@@ -5,7 +5,7 @@ import os
 import tempfile
 import importlib
 
-from collections import Callable
+from collections.abc import Callable
 from copy import deepcopy
 from shlex import quote as shell_quote
 from subprocess import CalledProcessError
